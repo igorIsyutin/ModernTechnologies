@@ -1,0 +1,50 @@
+version: '2'
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+    - "2181:2181"
+
+  kafka:
+    image: wurstmeister/kafka
+    hostname: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_CREATE_TOPICS: "log:1:1,verify:1:1"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  consumer:
+    image: igorisyutin/msdt-consumer:v1
+    ports:
+      - "8080:8080"
+    environment:
+      spring.kafka.bootstrap-servers: kafka:9092
+    depends_on:
+      - kafka
+      - zookeeper
+
+  producer:
+    image: igorisyutin/msdt-producer:v1
+    ports:
+      - "8081:8081"
+    environment:
+      spring.kafka.bootstrap-servers: kafka:9092
+    depends_on:
+      - kafka
+      - zookeeper
+
+  final-consumer:
+    image: igorisyutin/msdt-final-consumer:v1
+    ports:
+      - "8082:8082"
+    environment:
+      spring.kafka.bootstrap-servers: kafka:9092
+    depends_on:
+      - kafka
+      - zookeeper
