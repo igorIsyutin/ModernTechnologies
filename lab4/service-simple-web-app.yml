@@ -1,0 +1,13 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: my-app-service
+spec:
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+    nodePort: 30862
+  type: LoadBalancer
+  sessionAffinity: None
+  externalTrafficPolicy: Cluster
